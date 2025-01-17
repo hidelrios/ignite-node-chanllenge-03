@@ -16,10 +16,6 @@ interface CreateOrgUseCaseRequest {
   longitude: number;
 }
 
-// interface CreateOrgUseCaseResponse {
-//   org: Org;
-// }
-
 export class CreateOrgUseCase {
   constructor(private readonly orgsRepository: OrgsRespository) {}
 
