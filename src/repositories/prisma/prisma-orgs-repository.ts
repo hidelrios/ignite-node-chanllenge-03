@@ -1,11 +1,17 @@
 import { prisma } from "../../lib/prisma";
 import { Prisma, Org } from "@prisma/client";
 import { OrgsRespository } from "../orgs-repository";
+import { hash } from "bcryptjs";
 
 export class PrismaOrgsRepository implements OrgsRespository {
   async create(data: Prisma.OrgCreateInput): Promise<Org> {
+    const passwordHashed = await hash(data.password, 8);
+
     const org = await prisma.org.create({
-      data: data,
+      data: {
+        ...data,
+        password: passwordHashed,
+      },
     });
 
     return org;
@@ -14,6 +20,15 @@ export class PrismaOrgsRepository implements OrgsRespository {
     const org = await prisma.org.findUnique({
       where: {
         id: id,
+      },
+    });
+    return org;
+  }
+
+  async findByEmail(email: string): Promise<Org | null> {
+    const org = await prisma.org.findUnique({
+      where: {
+        email: email,
       },
     });
     return org;
@@ -34,10 +49,9 @@ export class PrismaOrgsRepository implements OrgsRespository {
   }
   async delete(id: string): Promise<Org> {
     return await prisma.org.delete({
-        where: {
-          id: id,
-        },
-      });
-    
+      where: {
+        id: id,
+      },
+    });
   }
 }

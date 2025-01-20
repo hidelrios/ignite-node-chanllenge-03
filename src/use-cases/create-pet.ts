@@ -1,6 +1,7 @@
 import { Org, Pet } from "@prisma/client";
 import { OrgsRespository } from "../repositories/orgs-repository";
 import { PetsRespository } from "../repositories/pets-repository";
+import { OrgNotFoundError } from "./erros/org-not-found.error";
 
 interface CreatePetUseCaseRequest {
   name: string;
@@ -12,6 +13,9 @@ interface CreatePetUseCaseRequest {
   photo: string;
   orgId: string;
 }
+interface CreatePetUseCaseResponse {
+  pet: Pet;
+}
 
 export class CreatePetUseCase {
   constructor(
@@ -19,12 +23,14 @@ export class CreatePetUseCase {
     private readonly orgsRespository: OrgsRespository
   ) {}
 
-  async execute(data: CreatePetUseCaseRequest): Promise<Pet> {
+  async execute(
+    data: CreatePetUseCaseRequest
+  ): Promise<CreatePetUseCaseResponse> {
     const org = await this.orgsRespository.findById(data.orgId);
     if (!org) {
-      throw new Error("Org not exist");
+      throw new OrgNotFoundError();
     }
     const pet = await this.petsRespository.create(data);
-    return pet;
+    return { pet };
   }
 }
